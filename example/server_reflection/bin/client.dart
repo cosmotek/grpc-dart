@@ -20,7 +20,7 @@ import 'package:grpc/server_reflection_v1alpha.dart';
 Future<void> main(List<String> args) async {
   final channel = ClientChannel(
     'localhost',
-    port: 5050,
+    port: 50051,
     options: ChannelOptions(
       credentials: ChannelCredentials.insecure(),
       codecRegistry:
@@ -35,18 +35,38 @@ Future<void> main(List<String> args) async {
       yield ServerReflectionRequest(
         // listServices indicates that a list of services should be returned. The content sent is not
         // evaluated by the server, so we'll send an empty string.
-        listServices: '',
+        host: 'localhost:50051',
+        listServices: '_',
       );
     }();
 
     final stream = stub.serverReflectionInfo(req);
     await for (var msg in stream) {
-      print('Got message ${msg.listServicesResponse}');
+      print('Got message ${msg}');
     }
 
   } catch (e) {
     print('Caught error: $e');
   }
+
+  // try {
+  //   final req = () async* {
+  //     // ServerReflectionRequest has a oneof with several options
+  //     yield ServerReflectionRequest(
+  //       fileContainingSymbol: 'v2.api.CarrierID',
+  //     );
+  //   }();
+
+  //   final stream = stub.serverReflectionInfo(req);
+  //   await for (var msg in stream) {
+  //     msg.fileDescriptorResponse.fileDescriptorProto.forEach((element) {
+  //       print(FileDescriptorProto.fromBuffer(element));
+  //     });
+  //   }
+
+  // } catch (e) {
+  //   print('Caught error 2: $e');
+  // }
   
   await channel.shutdown();
 }

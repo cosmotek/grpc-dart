@@ -106,6 +106,8 @@ class ConnectionServer {
   }
 
   Service? lookupService(String service) => _services[service];
+  List<Service> get services => _services.values.toList();
+  void addService(Service service) => _services[service.$name] = service;
 
   Future<void> serveConnection({
     required ServerTransportConnection connection,
