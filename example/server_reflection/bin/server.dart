@@ -15,9 +15,14 @@
 
 /// Dart implementation of the gRPC helloworld.Greeter server.
 import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:mirrors';
+import "package:path/path.dart";
 
 import 'package:grpc/grpc.dart';
 import 'package:grpc/server_reflection_v1alpha.dart';
+import 'package:protobuf/protobuf.dart';
 
 import '../lib/src/generated/helloworld.pbgrpc.dart';
 
@@ -26,24 +31,55 @@ class ReflectionService extends ServerReflectionServiceBase {
 
   ReflectionService(this._services) : super();
 
+  FileDescriptorResponse handleFileByFilenameRequest(String filename) {
+    return FileDescriptorResponse(
+      fileDescriptorProto: [],
+    );
+  }
+
+  FileDescriptorResponse handleFileContainingSymbolRequest(String symbol) {
+    return FileDescriptorResponse(
+      fileDescriptorProto: [],
+    );
+  }
+
+  void handleFileContainingExtensionRequest() {
+
+  }
+
+  void handleAllExtensionNumbersOfTypeRequest() {
+
+  }
+
+  ListServiceResponse handleListServicesRequest() {
+    return ListServiceResponse(
+      service: _services.map((svc) => ServiceResponse(name: svc.$name))
+    );
+  }
+
   @override
   Stream<ServerReflectionResponse> serverReflectionInfo(ServiceCall call, Stream<ServerReflectionRequest> request) {
     final controller = StreamController<ServerReflectionResponse>();
 
     request.listen((req) {
-      if (req.hasListServices()) {
-        controller.add(ServerReflectionResponse(
-          validHost: req.host,
-          originalRequest: req,
-          listServicesResponse: ListServiceResponse(
-            service: _services.map((svc) => ServiceResponse(name: svc.$name))
-          )
-        ));
+      var res = ServerReflectionResponse(
+        validHost: req.host,
+        originalRequest: req,
+        listServicesResponse: handleListServicesRequest(),
+      );
 
+      if (req.hasFileByFilename()) {
+        res.fileDescriptorResponse = handleFileByFilenameRequest(req.fileByFilename);
+      } else if (req.hasFileContainingSymbol()) {
+        res.fileDescriptorResponse = handleFileContainingSymbolRequest(req.fileContainingSymbol);
+      } else if (req.hasListServices()) {
+        res.listServicesResponse = handleListServicesRequest();
+      } else {
+        controller.addError(GrpcError.unimplemented());
         return;
       }
 
-      controller.addError(GrpcError.unimplemented());
+      controller.add(res);
     }, onDone: () => controller.close());
 
     return controller.stream;
@@ -57,19 +93,98 @@ class GreeterService extends GreeterServiceBase {
   }
 }
 
-
 void registerServer(Server server) {
   server.addService(ReflectionService(server.services));
 }
 
+class TypeMeta {
+  String? name;
+  String? packageName;
+}
+
+class MethodMeta {
+  String? name;
+  TypeMeta? inputType;
+  TypeMeta? returnType;
+}
+
+class ServiceMeta {
+  String? name;
+  List<MethodMeta> methods = [];
+}
+
 Future<void> main(List<String> args) async {
-  final server = Server.create(
-    services: [GreeterService()],
-    codecRegistry: CodecRegistry(codecs: const [GzipCodec(), IdentityCodec()]),
-  );
+  // final server = Server.create(
+  //   services: [GreeterService()],
+  //   codecRegistry: CodecRegistry(codecs: const [GzipCodec(), IdentityCodec()]),
+  // );
 
-  registerServer(server);
+  final svc = GreeterService();
+  final meta = ServiceMeta();
 
-  await server.serve(port: 50051);
-  print('Server listening on port ${server.port}...');
+  meta.name = svc.$name;
+
+    final im = reflect(svc);
+    final classMirror = im.type;
+
+    if (classMirror.superclass == null) {
+      throw 'Service does implement generated base';
+    }
+
+    var basepkg = dirname(classMirror.superclass!.location!.sourceUri.toString());
+    var libs = currentMirrorSystem().libraries.entries.toList();
+    libs.removeWhere((e) => dirname(e.key.toString()) != basepkg);
+    var decs = <Symbol, DeclarationMirror>{};
+    libs.forEach((e) => decs.addAll(e.value.declarations));
+
+    libs.forEach((lib) {
+      // var decs = lib.declarations.entries.toList();
+      // decs.removeWhere((entry) => 
+      //   entry.value is! ClassMirror ||
+      //   entry.value.isPrivate
+      // );
+
+      // decs.forEach((entry) {
+      //   print(entry.key);
+      //   print((entry.value as ClassMirror).location?.sourceUri);
+
+      //           // (entry.value as ClassMirror).superclass?.simpleName.toString() != 'GeneratedMessage'
+      // });
+    });
+
+
+    for (var v in classMirror.declarations.values) {
+      if (
+        v is MethodMirror &&
+        v.isRegularMethod &&
+        v.parameters.length == 2) {
+
+        var inputTypeSymbol = v.parameters.last.type.simpleName;
+        var inputTypeClass = decs[inputTypeSymbol];
+
+        if (inputTypeClass is ClassMirror) {
+          var cls = inputTypeClass as ClassMirror;
+          var dat = cls.newInstance(Symbol(""), []);
+          var msg = dat.reflectee as GeneratedMessage;
+          print(msg.info_.qualifiedMessageName);
+        }
+
+        
+        meta.methods.add((MethodMeta()
+          ..name = MirrorSystem.getName(v.simpleName)
+          // ..inputType 
+        ));
+      }
+    }
+
+
+      // var foo = "";
+      // if (foo is GeneratedMessage) {
+        
+      // }
+
+  // registerServer(server);
+
+  // await server.serve(port: 50051);
+  // print('Server listening on port ${server.port}...');
 }
