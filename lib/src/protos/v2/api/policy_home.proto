@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package v2.api;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/api";
+
+import "v2/api/policy_base.proto";
+import "v2/common/us_postal_address.proto";
+
+message HomePolicyInput {
+    BasePolicyInput base_policy = 1;
+    repeated v2.common.USPostalAddressInput addresses = 2;
+}
+
+message HomePolicy {
+    BasePolicy base_policy = 1;
+    repeated v2.common.USPostalAddress addresses = 2;
+}

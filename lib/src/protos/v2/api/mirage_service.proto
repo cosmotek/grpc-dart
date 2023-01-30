@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package v2.api;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/api";
+
+import "v2/api/agency.proto";
+import "v2/api/bill.proto";
+import "v2/api/policy.proto";
+import "v2/api/policy_documents.proto";
+import "v2/api/policyholder.proto";
+
+import "v2/common/healthcheck_dummy_text.proto";
+import "v2/common/id.proto";
+
+import "google/protobuf/wrappers.proto";
+
+// The Mirage service provides methods for upserting & fetching policies, policyholders, agencies and policies documents
+service Mirage {
+    // Basic healthcheck method that returns the input string in reverse
+    rpc HealthCheck(v2.common.HealthcheckDummyText) returns (v2.common.HealthcheckDummyText) {}
+
+    // GetPolicyholder returns any one policyholder that was found with a matching email or phonenumber
+    rpc GetPolicyholder(PolicyholderQueryInput) returns (Policyholder) {}
+    rpc UpsertPolicyholder(PolicyholderInput) returns (Policyholder) {}
+
+    // UpsertPolicy upserts a policy
+    rpc UpsertPolicy(PolicyInput) returns (Policy) {}
+    rpc PoliciesByHolderID(v2.common.IDInput) returns (ListOfPolicies) {}
+
+    // UpsertAgency upserts an agency
+    rpc UpsertAgency(AgencyInput) returns (Agency) {}
+
+    // UpsertBill upserts a bill
+    rpc UpsertBill(BillInput) returns (Bill) {}
+    rpc UpdateBillByID(BillUpdateInput) returns (Bill) {}
+    rpc QueryBill(BillQueryInput) returns (Bill) {}
+    rpc ListBills(stream ListBillsRequest) returns (stream ListOfBills) {}
+    rpc QueryPolicyBillOverviews(stream QueryPolicyBillOverviewsRequest) returns (stream ListOfPolicyBillOverviews) {}
+
+    // PolicyDocumentsByPolicyID returns a list of policy documents associated with the provided policy ID
+    rpc PolicyDocumentsByPolicyID(v2.common.IDInput) returns (ListOfPolicyDocuments) {}
+    rpc PolicyDocumentExists(PolicyDocumentDiffInfo) returns (google.protobuf.BoolValue) {}
+    rpc UploadPolicyDocument(PolicyDocumentInput) returns (PolicyDocument) {}
+}

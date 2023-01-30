@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package v2.common;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/common";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+message USPostalAddressInput {
+    string address = 1;
+    google.protobuf.StringValue address2 = 2;
+    string city = 3;
+    string state_abbrev = 4;
+    string zipcode = 5;
+}
+
+message USPostalAddress {
+    string address = 1;
+    google.protobuf.StringValue address2 = 2;
+    string city = 3;
+    string state_abbrev = 4;
+    string zipcode = 5;
+}

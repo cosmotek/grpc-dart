@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package v2.api;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/api";
+
+import "v2/api/enums.proto";
+import "v2/api/bill.proto";
+
+import "v2/common/resource_timestamps.proto";
+import "v2/common/civildate.proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+message BasePolicyInput {
+    string source_id = 1;
+    string source_reference_id = 2;
+    string policy_number = 3;
+    CarrierID carrier_id = 4;
+
+    // this should be the same as the source_reference_id constructed for the policyholder
+    string primary_policyholder_source_reference_id = 5;
+    // (optional) this should be the same as the source_reference_id constructred for the agency
+    google.protobuf.StringValue agency_source_reference_id = 8;
+
+    v2.common.CivilDate start_date = 6;
+    v2.common.CivilDate end_date = 7;
+}
+
+message BasePolicy {
+    string id = 1;
+    string policyholder_id = 2;
+    google.protobuf.StringValue agency_id = 5;
+
+    BasePolicyInput input_fields = 3;
+
+    v2.common.ResourceTimestamps timestamps = 4;
+
+    repeated Bill bills = 6;
+}

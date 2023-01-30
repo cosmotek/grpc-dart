@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package v2.api;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/api";
+
+enum CarrierID {
+    CARRIER_UNSPECIFIED = 0;
+    CARRIER_KEY_INSURANCE = 1;
+}
+
+enum DocumentType {
+    DOCUMENT_TYPE_UNKNOWN = 0;
+    DOCUMENT_TYPE_ID_CARD = 1;
+    DOCUMENT_TYPE_POLICY_DECLARATION = 2;
+    DOCUMENT_TYPE_BILL = 3;
+    DOCUMENT_TYPE_CANCELLATION = 4;
+    DOCUMENT_TYPE_WELCOME_LETTER = 5;
+}

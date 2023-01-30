@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+package v2.api;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/api";
+
+import "v2/api/enums.proto";
+import "v2/common/resource_timestamps.proto";
+import "v2/common/civildate.proto";
+import "v2/common/daterange.proto";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+message BillInput {
+    string source_id = 1;
+    string source_reference_id = 2;
+
+    string policy_source_reference_id = 3;
+
+    map<string, int64> line_items = 4;
+    int64 amount_due_cents = 5;
+    v2.common.CivilDate payment_due_date = 6;
+
+    google.protobuf.BoolValue payment_completed = 7;
+    
+    // payment_config_identifier is the payment method or mode
+    // as defined by the imported data source. In the Key Insurance
+    // implementation, values may be "Manually Entered" or something
+    // similar to "Autopay CC XXXX Visa".
+    google.protobuf.StringValue payment_config_identifier = 8;
+    google.protobuf.BoolValue autopay_enabled = 9;
+}
+
+message BillUpdateInput {
+    string id = 1;
+    string policy_id = 2;
+
+    string source_id = 3;
+    string source_reference_id = 4;
+
+    map<string, int64> line_items = 5;
+    int64 amount_due_cents = 6;
+    v2.common.CivilDate payment_due_date = 7;
+
+    google.protobuf.BoolValue payment_completed = 8;
+
+    // payment_config_identifier is the payment method or mode
+    // as defined by the imported data source. In the Key Insurance
+    // implementation, values may be "Manually Entered" or something
+    // similar to "Autopay CC XXXX Visa".
+    google.protobuf.StringValue payment_config_identifier = 9;
+    google.protobuf.BoolValue autopay_enabled = 10;
+}
+
+message Bill {
+    string id = 1;
+    string policy_id = 2;
+
+    string source_id = 3;
+    string source_reference_id = 4;
+
+    map<string, int64> line_items = 5;
+    int64 amount_due_cents = 6;
+    v2.common.CivilDate payment_due_date = 7;
+
+    google.protobuf.BoolValue payment_completed = 8;
+
+    // payment_config_identifier is the payment method or mode
+    // as defined by the imported data source. In the Key Insurance
+    // implementation, values may be "Manually Entered" or something
+    // similar to "Autopay CC XXXX Visa".
+    google.protobuf.StringValue payment_config_identifier = 9;
+    google.protobuf.BoolValue autopay_enabled = 10;
+
+    v2.common.ResourceTimestamps timestamps = 11;
+}
+
+message BillQueryInput {
+    CarrierID carrier_id = 1;
+    google.protobuf.StringValue policy_id = 2;
+    v2.common.DateRange due_date = 3;
+}
+
+// ListBillsRequest is used for the ListBills
+// bidirectional streaming method. The usage flow should be the following:
+//
+// 1. Send carrier_id for first request to initialize the stream,
+//    The stream will return the first page automatically.
+// 2. Send next_page_indicator to request additional pages. Once
+//    the final page of data has been sent, the stream will be
+//    closed by the server (automatically).
+//
+// Note: The stream may be closed by the server on error, or if there is no
+// more data to send. The stream may be closed by the client on-demand.
+message ListBillsRequest {
+    oneof request_data {
+        CarrierID carrier_id = 1;
+        google.protobuf.Empty next_page_indicator = 2;
+    }
+}
+
+message ListOfBills {
+    repeated Bill bills = 1;
+}
+
+message PolicyBillOverviewQueryInput {
+    CarrierID carrier_id = 1;
+    v2.common.DateRange due_date = 2;
+    v2.common.DateRange created_date = 3;
+    google.protobuf.BoolValue autopay_enabled = 4;
+    google.protobuf.BoolValue bill_paid = 5;
+    google.protobuf.BoolValue policyholder_has_email = 6;
+
+    google.protobuf.UInt64Value page_size = 7;
+}
+
+message PolicyBillOverview {
+    string policy_number = 1;
+    google.protobuf.StringValue policyholder_email = 2;
+    google.protobuf.StringValue policyholder_first_name = 3;
+    google.protobuf.StringValue policyholder_last_name = 4;
+
+    google.protobuf.StringValue agency_name = 5;
+    CarrierID carrier_id = 6;
+    
+    v2.common.CivilDate due_date = 7;
+    int64 amount_due_cents = 8;
+
+    // payment_config_identifier is the payment method or mode
+    // as defined by the imported data source. In the Key Insurance
+    // implementation, values may be "Manually Entered" or something
+    // similar to "Autopay CC XXXX Visa".
+    google.protobuf.StringValue payment_config_identifier = 9;
+    google.protobuf.BoolValue autopay_enabled = 10;
+}
+
+// QueryPolicyBillOverviewsRequest is used for the QueryPolicyBillOverviews
+// bidirectional streaming method. The usage flow should be the following:
+//
+// 1. Send query_input for first request to initialize the stream,
+//    The stream will return the first page automatically.
+// 2. Send next_page_indicator to request additional pages. Once
+//    the final page of data has been sent, the stream will be
+//    closed by the server (automatically).
+//
+// Note: The stream may be closed by the server on error, or if there is no
+// more data to send. The stream may be closed by the client on-demand.
+message QueryPolicyBillOverviewsRequest {
+    oneof request_data {
+        PolicyBillOverviewQueryInput query_input = 1;
+        google.protobuf.Empty next_page_indicator = 2;
+    }
+}
+
+message ListOfPolicyBillOverviews {
+    repeated PolicyBillOverview bill_overviews = 1;
+}

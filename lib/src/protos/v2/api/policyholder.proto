@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package v2.api;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/api";
+
+import "v2/api/enums.proto";
+import "v2/common/us_postal_address.proto";
+import "v2/common/resource_timestamps.proto";
+
+import "google/protobuf/wrappers.proto";
+
+message PolicyholderInput {
+    string source_id = 1;
+    string source_reference_id = 2;
+    CarrierID carrier_id = 3;
+
+    google.protobuf.StringValue email_address = 4;
+    google.protobuf.StringValue phone_number = 5;
+
+    google.protobuf.StringValue first_name = 6;
+    google.protobuf.StringValue last_name = 7;
+    v2.common.USPostalAddressInput mailing_address = 8;
+}
+
+message Policyholder {
+    string id = 1;
+    string source_id = 2;
+    string source_reference_id = 3;
+
+    CarrierID carrier = 4;
+    google.protobuf.StringValue email_address = 5;
+    google.protobuf.StringValue phone_number = 6;
+
+    google.protobuf.StringValue first_name = 7;
+    google.protobuf.StringValue last_name = 8;
+    v2.common.USPostalAddress mailing_address = 9;
+
+    v2.common.ResourceTimestamps timestamps = 10;
+}
+
+message PolicyholderQueryInput {
+    CarrierID carrier = 1;
+    string email_address_or_phone_number = 2;
+}

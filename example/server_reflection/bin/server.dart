@@ -18,6 +18,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:mirrors';
+import 'package:grpc/src/generated/v2/common/id.pb.dart';
+import 'package:grpc/src/generated/v2/common/healthcheck_dummy_text.pb.dart';
+import 'package:grpc/src/generated/v2/api/policyholder.pb.dart';
+import 'package:grpc/src/generated/v2/api/policy_documents.pb.dart';
+import 'package:grpc/src/generated/v2/api/policy.pb.dart';
+import 'package:grpc/src/generated/v2/api/bill.pb.dart';
+import 'package:grpc/src/generated/v2/api/agency.pb.dart';
+import 'package:grpc/src/generated/google/protobuf/wrappers.pb.dart';
 import "package:path/path.dart";
 
 import 'package:grpc/grpc.dart';
@@ -25,6 +33,7 @@ import 'package:grpc/server_reflection_v1alpha.dart';
 import 'package:protobuf/protobuf.dart';
 
 import '../lib/src/generated/helloworld.pbgrpc.dart';
+import '../../../lib/src/generated/v2/api/mirage_service.pbgrpc.dart';
 
 class ReflectionService extends ServerReflectionServiceBase {
   List<Service> _services;
@@ -38,8 +47,10 @@ class ReflectionService extends ServerReflectionServiceBase {
   }
 
   FileDescriptorResponse handleFileContainingSymbolRequest(String symbol) {
+    var files = [];
+
     return FileDescriptorResponse(
-      fileDescriptorProto: [],
+      fileDescriptorProto: files.map((file) => FileDescriptorProto().writeToBuffer().buffer.asInt64List()),
     );
   }
 
@@ -151,7 +162,6 @@ Future<void> main(List<String> args) async {
       //           // (entry.value as ClassMirror).superclass?.simpleName.toString() != 'GeneratedMessage'
       // });
     });
-
 
     for (var v in classMirror.declarations.values) {
       if (

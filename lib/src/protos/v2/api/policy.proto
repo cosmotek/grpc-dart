@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package v2.api;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/api";
+
+import "v2/api/policy_home.proto";
+import "v2/api/policy_auto.proto";
+
+message PolicyInput {
+    oneof typed_policy_input {
+        AutoPolicyInput auto_policy = 1;
+        HomePolicyInput home_policy = 2;
+    }
+}
+
+message Policy {
+    oneof typed_policy {
+        AutoPolicy auto_policy = 1;
+        HomePolicy home_policy = 2;
+    }
+}
+
+message ListOfPolicies {
+    repeated Policy policies = 1;
+}

@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package v2.api;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/api";
+
+import "v2/api/policy_base.proto";
+import "v2/common/resource_timestamps.proto";
+
+import "google/protobuf/wrappers.proto";
+
+message AutoPolicyInput {
+    BasePolicyInput base_policy = 1;
+    repeated PolicyDriverInput drivers = 2;
+    repeated PolicyVehicleInput vehicles = 3;
+}
+
+message AutoPolicy {
+    BasePolicy base_policy = 1;
+    repeated PolicyDriver drivers = 2;
+    repeated PolicyVehicle vehicles = 3;
+}
+
+message PolicyDriverInput {
+    google.protobuf.StringValue first_name = 1;
+    google.protobuf.StringValue middle_name = 2;
+    google.protobuf.StringValue last_name = 3;
+}
+
+message PolicyDriver {
+    string id = 1;
+    string policy_id = 2;
+
+    PolicyDriverInput input_fields = 3;
+
+    v2.common.ResourceTimestamps timestamps = 4;
+}
+
+message PolicyVehicleInput{
+    google.protobuf.StringValue make = 1;
+    google.protobuf.StringValue model = 2;
+    google.protobuf.StringValue year = 3;
+    google.protobuf.StringValue vin = 4;
+}
+
+message PolicyVehicle{
+    string id = 1;
+    string policy_id = 2;
+
+    PolicyVehicleInput input_fields = 3;
+
+    v2.common.ResourceTimestamps timestamps = 4;
+}

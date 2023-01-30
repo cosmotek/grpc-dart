@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package v2.api;
+option go_package = "github.com/gloveboxhq/glovebox/mirage/gen/proto/go/v2/api";
+
+import "v2/api/enums.proto";
+import "v2/common/resource_timestamps.proto";
+
+import "google/protobuf/timestamp.proto";
+
+message PolicyDocumentInput {
+    string policy_id = 1;
+    string source_id = 2;
+    string source_reference_id = 3;
+    string name = 4;
+    DocumentType document_type = 5;
+    bytes data = 6;
+}
+
+message PolicyDocument {
+    string id = 1;
+    string policy_id = 2;
+    string source_id = 3;
+    string source_reference_id = 4;
+    
+    string name = 5;
+    DocumentType document_type = 6;
+    string md5_checksum = 7;
+
+    v2.common.ResourceTimestamps timestamps = 8;
+
+    string presigned_download_url = 9;
+    google.protobuf.Timestamp download_url_expires_at = 10;
+}
+
+message ListOfPolicyDocuments {
+    repeated PolicyDocument documents = 1;
+}
+
+message PolicyDocumentID {
+    string id = 1;
+}
+
+message PolicyDocumentDiffInfo {
+    string md5_checksum = 1;
+    string source_id = 2;
+    string source_reference_id = 3;
+}
